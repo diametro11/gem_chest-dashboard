@@ -1,9 +1,9 @@
 const express = require('express');
-const fs = require('fs');
+const fetch = require('node-fetch');
 const app = express();
 const PORT = 3000;
 
-// Punktelogik hinzufügen
+// Punktelogik (falls noch gebraucht)
 const chestPoints = {
   "Common": {
     "5": 5,
@@ -34,12 +34,24 @@ const chestPoints = {
   }
 };
 
+// URL vom Bot oder Datenquelle, die du abrufen willst
+const DATA_URL = 'https://dein-bot-server/api/chestdata'; // Hier URL anpassen
+
 app.use(express.static('public'));
 
-// Route /data gibt die Daten zurück (z.B. aus data.json)
-app.get('/data', (req, res) => {
-  const data = JSON.parse(fs.readFileSync('data.json'));
-  res.json(data);
+// Route /data gibt Daten vom Bot dynamisch zurück
+app.get('/data', async (req, res) => {
+  try {
+    const response = await fetch(DATA_URL);
+    if (!response.ok) {
+      throw new Error(`Fehler beim Laden: ${response.statusText}`);
+    }
+    const data = await response.json();
+    res.json(data);
+  } catch (error) {
+    console.error('Fehler beim Abrufen der Daten:', error);
+    res.status(500).json({ error: 'Daten konnten nicht geladen werden' });
+  }
 });
 
 app.listen(PORT, () => {
