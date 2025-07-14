@@ -19,20 +19,90 @@
         <th>Punkte</th>
       </tr>
     </thead>
-    <tbody></tbody>
+    <tbody>
+      <!-- Daten werden hier automatisch eingefügt -->
+    </tbody>
   </table>
 
   <script>
-    fetch('/data')
-      .then(res => res.json())
-      .then(data => {
-        const tbody = document.querySelector('#pointsTable tbody');
-        Object.entries(data).forEach(([user, points]) => {
-          const row = document.createElement('tr');
-          row.innerHTML = `<td>${user}</td><td>${points}</td>`;
-          tbody.appendChild(row);
-        });
-      });
+    // Punktesystem (Type + Level)
+    const pointsSystem = {
+      "Common": {
+        "5": 5,
+        "10": 10,
+        "15": 15,
+        "20": 20,
+        "25": 25
+      },
+      "Rare": {
+        "10": 20,
+        "15": 25,
+        "20": 30,
+        "25": 35,
+        "30": 40
+      },
+      "Epic": {
+        "15": 30,
+        "20": 35,
+        "25": 40,
+        "30": 45,
+        "35": 50
+      },
+      "Arena": {
+        "Any": 5
+      },
+      "Citadel": {
+        "Any": 30
+      }
+    };
+
+    async function loadData() {
+      const res = await fetch('/data');
+      const data = await res.json();
+      const tbody = document.querySelector('#pointsTable tbody');
+      tbody.innerHTML = '';
+
+      // Beispielhafte Datenstruktur von data.json
+      // {
+      //   "Tebur": [
+      //     { "type": "Common", "level": "20" },
+      //     { "type": "Rare", "level": "25" }
+      //   ],
+      //   "Nirius": [
+      //     { "type": "Epic", "level": "30" }
+      //   ]
+      // }
+
+      for (const userId in data) {
+        const chests = data[userId];
+        let totalPoints = 0;
+
+        for (const chest of chests) {
+          const typePoints = pointsSystem[chest.type];
+          if (typePoints) {
+            const levelKey = chest.level.toString();
+            if (typePoints[levelKey] !== undefined) {
+              totalPoints += typePoints[levelKey];
+            } else if (typePoints["Any"] !== undefined) {
+              totalPoints += typePoints["Any"];
+            }
+          }
+        }
+
+        const row = document.createElement('tr');
+        const nameCell = document.createElement('td');
+        const pointsCell = document.createElement('td');
+
+        nameCell.textContent = userId;
+        pointsCell.textContent = totalPoints;
+
+        row.appendChild(nameCell);
+        row.appendChild(pointsCell);
+        tbody.appendChild(row);
+      }
+    }
+
+    loadData();
   </script>
 </body>
 </html>
