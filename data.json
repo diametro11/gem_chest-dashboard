@@ -1,4 +1,9 @@
 {
-  "123456789": 40,
-  "987654321": 70
+  "Tebur": [
+    { "type": "Common", "level": "20" },
+    { "type": "Rare", "level": "25" }
+  ],
+  "Nirius": [
+    { "type": "Epic", "level": "30" }
+  ]
 }
