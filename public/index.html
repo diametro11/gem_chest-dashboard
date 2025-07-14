@@ -20,89 +20,58 @@
       </tr>
     </thead>
     <tbody>
-      <!-- Daten werden hier automatisch eingefügt -->
+      <!-- Daten kommen hier rein -->
     </tbody>
   </table>
 
   <script>
-    // Punktesystem (Type + Level)
-    const pointsSystem = {
-      "Common": {
-        "5": 5,
-        "10": 10,
-        "15": 15,
-        "20": 20,
-        "25": 25
-      },
-      "Rare": {
-        "10": 20,
-        "15": 25,
-        "20": 30,
-        "25": 35,
-        "30": 40
-      },
-      "Epic": {
-        "15": 30,
-        "20": 35,
-        "25": 40,
-        "30": 45,
-        "35": 50
-      },
-      "Arena": {
-        "Any": 5
-      },
-      "Citadel": {
-        "Any": 30
-      }
-    };
+    // URL der API (dein Server)
+    const API_URL = '/data';
 
+    // Tabelle holen
+    const table = document.getElementById('pointsTable');
+
+    // Funktion zum Einfügen einer Zeile in die Tabelle
+    function addRow(user) {
+      const tr = document.createElement('tr');
+
+      // Spalte für UserId oder UserName
+      const tdUser = document.createElement('td');
+      tdUser.textContent = user.userName || user.userId;
+      tr.appendChild(tdUser);
+
+      // Spalte für Punkte
+      const tdPoints = document.createElement('td');
+      tdPoints.textContent = user.points;
+      tr.appendChild(tdPoints);
+
+      // Zeile an Tabellenkörper anhängen
+      table.querySelector('tbody').appendChild(tr);
+    }
+
+    // Daten von API laden und Tabelle füllen
     async function loadData() {
-      const res = await fetch('/data');
-      const data = await res.json();
-      const tbody = document.querySelector('#pointsTable tbody');
-      tbody.innerHTML = '';
+      try {
+        const response = await fetch(API_URL);
+        const data = await response.json();
 
-      // Beispielhafte Datenstruktur von data.json
-      // {
-      //   "Tebur": [
-      //     { "type": "Common", "level": "20" },
-      //     { "type": "Rare", "level": "25" }
-      //   ],
-      //   "Nirius": [
-      //     { "type": "Epic", "level": "30" }
-      //   ]
-      // }
+        // Tabelle leeren (außer Header)
+        const tbody = table.querySelector('tbody');
+        tbody.innerHTML = '';
 
-      for (const userId in data) {
-        const chests = data[userId];
-        let totalPoints = 0;
-
-        for (const chest of chests) {
-          const typePoints = pointsSystem[chest.type];
-          if (typePoints) {
-            const levelKey = chest.level.toString();
-            if (typePoints[levelKey] !== undefined) {
-              totalPoints += typePoints[levelKey];
-            } else if (typePoints["Any"] !== undefined) {
-              totalPoints += typePoints["Any"];
-            }
-          }
+        // Prüfen, ob data ein Array ist oder ein einzelnes Objekt
+        if (Array.isArray(data)) {
+          data.forEach(user => addRow(user));
+        } else {
+          addRow(data);
         }
-
-        const row = document.createElement('tr');
-        const nameCell = document.createElement('td');
-        const pointsCell = document.createElement('td');
-
-        nameCell.textContent = userId;
-        pointsCell.textContent = totalPoints;
-
-        row.appendChild(nameCell);
-        row.appendChild(pointsCell);
-        tbody.appendChild(row);
+      } catch (error) {
+        console.error('Fehler beim Laden der Daten:', error);
       }
     }
 
-    loadData();
+    // Beim Laden der Seite Daten abrufen
+    window.onload = loadData;
   </script>
 </body>
 </html>
