@@ -1,77 +1,56 @@
 <!DOCTYPE html>
 <html lang="de">
 <head>
-  <meta charset="UTF-8" />
-  <title>GEM Chest Punkte</title>
-  <style>
-    body { font-family: Arial, sans-serif; padding: 20px; }
-    table { border-collapse: collapse; width: 100%; margin-top: 20px; }
-    th, td { border: 1px solid #aaa; padding: 8px; text-align: center; }
-    th { background-color: #eee; }
-  </style>
+<meta charset="UTF-8" />
+<title>GEM Chest Dashboard</title>
+<style>
+  body { font-family: Arial, sans-serif; padding: 20px; }
+  table { border-collapse: collapse; width: 100%; }
+  th, td { border: 1px solid #aaa; padding: 8px; text-align: center; }
+  th { background-color: #eee; color: blue; }
+</style>
 </head>
 <body>
-  <h1>GEM Chest Punkte</h1>
-  <table id="pointsTable">
-    <thead>
-      <tr>
-        <th>User ID</th>
-        <th>Punkte</th>
-      </tr>
-    </thead>
-    <tbody>
-      <!-- Daten kommen hier rein -->
-    </tbody>
-  </table>
 
-  <script>
-    // URL der API (dein Server)
-    const API_URL = '/data';
+<h1>Clan Members</h1>
+<table id="membersTable">
+  <thead>
+    <tr>
+      <th>Member Name</th>
+      <th>Chest Count</th>
+      <th>Total Points</th>
+      <th>Epic 20-35</th>
+      <th>Epic 35</th>
+      <th>Cit. 30</th>
+    </tr>
+  </thead>
+  <tbody></tbody>
+</table>
 
-    // Tabelle holen
-    const table = document.getElementById('pointsTable');
+<script>
+  async function loadData() {
+    const response = await fetch('/data');
+    const members = await response.json();
 
-    // Funktion zum Einfügen einer Zeile in die Tabelle
-    function addRow(user) {
+    const tbody = document.querySelector('#membersTable tbody');
+    tbody.innerHTML = ''; // clear
+
+    members.forEach(member => {
       const tr = document.createElement('tr');
+      tr.innerHTML = `
+        <td>${member.userName}</td>
+        <td>${member.chestCount}</td>
+        <td>${member.totalPoints}</td>
+        <td>${member.epic20_35}</td>
+        <td>${member.epic35}</td>
+        <td>${member.citadel30}</td>
+      `;
+      tbody.appendChild(tr);
+    });
+  }
 
-      // Spalte für UserId oder UserName
-      const tdUser = document.createElement('td');
-      tdUser.textContent = user.userName || user.userId;
-      tr.appendChild(tdUser);
+  loadData();
+</script>
 
-      // Spalte für Punkte
-      const tdPoints = document.createElement('td');
-      tdPoints.textContent = user.points;
-      tr.appendChild(tdPoints);
-
-      // Zeile an Tabellenkörper anhängen
-      table.querySelector('tbody').appendChild(tr);
-    }
-
-    // Daten von API laden und Tabelle füllen
-    async function loadData() {
-      try {
-        const response = await fetch(API_URL);
-        const data = await response.json();
-
-        // Tabelle leeren (außer Header)
-        const tbody = table.querySelector('tbody');
-        tbody.innerHTML = '';
-
-        // Prüfen, ob data ein Array ist oder ein einzelnes Objekt
-        if (Array.isArray(data)) {
-          data.forEach(user => addRow(user));
-        } else {
-          addRow(data);
-        }
-      } catch (error) {
-        console.error('Fehler beim Laden der Daten:', error);
-      }
-    }
-
-    // Beim Laden der Seite Daten abrufen
-    window.onload = loadData;
-  </script>
 </body>
 </html>
